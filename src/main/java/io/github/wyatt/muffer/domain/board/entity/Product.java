@@ -35,7 +35,9 @@ public class Product extends BaseEntity {
     private String damagedInfo;
 
     private String driver; // 드라이버 크기
+    @Enumerated(EnumType.STRING)
     private ChargeType chargeType; // 충전 방식
+    @Enumerated(EnumType.STRING)
     private MicType micType; // 마이크 타입
     private String connectType; // 연결방식
     private float batteryTime;
