@@ -53,4 +53,17 @@ public class Board extends BaseEntity {
                 .build();
     }
 
+    @Override
+    public String toString() {
+        return "Board{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", status=" + status +
+                ", brandOptionId=" + brandOptionId +
+                ", customBrand='" + customBrand + '\'' +
+                ", initialPrice=" + initialPrice +
+                ", exposureLevel=" + exposureLevel +
+                ", product=" + product.toString() +
+                '}';
+    }
 }

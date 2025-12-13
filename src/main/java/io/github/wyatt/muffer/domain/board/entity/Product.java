@@ -88,5 +88,26 @@ public class Product extends BaseEntity {
     }
 
 
+    @Override
+    public String toString() {
+        return "Product{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", category=" + category +
+                ", qualityGrade=" + qualityGrade +
+                ", serialCode='" + serialCode + '\'' +
+                ", isSecondedHand=" + isSecondedHand +
+                ", usePeriod=" + usePeriod +
+                ", isDamaged=" + isDamaged +
+                ", damagedInfo='" + damagedInfo + '\'' +
+                ", driver='" + driver + '\'' +
+                ", chargeType=" + chargeType +
+                ", micType=" + micType +
+                ", connectType='" + connectType + '\'' +
+                ", batteryTime=" + batteryTime +
+                ", canWire=" + canWire +
+                ", canWireless=" + canWireless +
+                '}';
+    }
 
 }
