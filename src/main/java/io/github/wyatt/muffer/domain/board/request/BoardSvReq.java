@@ -18,6 +18,7 @@ public record BoardSvReq(
         @NotNull(message = "재판매 여부는 필수입니다.") boolean isSecondedHand,
         int usePeriod,
         @NotNull(message = "상품 상태는 필수입니다.")  boolean isDamaged,
+        String brandName,
         String damageInfo,
         String driver,
         ChargeType chargeType,
@@ -34,6 +35,8 @@ public record BoardSvReq(
                 productName,
                 productCategory,
                 qualityGrade,
+                brandOptionId,
+                customBrand,
                 serialCode,
                 isSecondedHand,
                 usePeriod,
@@ -49,15 +52,14 @@ public record BoardSvReq(
         );
     }
 
-    public Board toEntity(Product product) {
+    public Board toEntity(Product product, int memberId) {
         return Board.create(
                 title,
                 BoardStatus.SELLING,
                 product,
-                brandOptionId,
-                customBrand,
                 initialPrice,
-                exposureLevel
+                exposureLevel,
+                memberId
         );
     }
 
