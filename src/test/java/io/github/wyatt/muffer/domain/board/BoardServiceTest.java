@@ -10,11 +10,15 @@ import io.github.wyatt.muffer.domain.board.repository.BoardRepo;
 import io.github.wyatt.muffer.domain.board.repository.ProductRepo;
 import io.github.wyatt.muffer.domain.board.request.BoardFilterReq;
 import io.github.wyatt.muffer.domain.board.response.BoardListRes;
+import io.github.wyatt.muffer.domain.option.Option;
+import io.github.wyatt.muffer.domain.option.OptionRepo;
+import io.github.wyatt.muffer.domain.option.OptionType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,13 +42,23 @@ class BoardServiceTest {
     @Autowired
     ProductRepo productRepo;
 
+    @Autowired
+    OptionRepo optionRepo;
+
+    Option option;
+    Product product;
+    Board board;
+
 
     @BeforeEach
     void setUp() {
-        Product product = Product.create(
-                "test name",
+        option = Option.create(OptionType.BRAND, "test brand");
+        product = Product.create(
+                "test product name",
                 ProductCategory.HEADPHONE,
                 QualityGrade.A,
+                1,
+                null,
                 "serial code",
                 false,
                 4,
@@ -58,20 +72,20 @@ class BoardServiceTest {
                 true,
                 false
         );
-        Board board = Board.create(
+        board = Board.create(
                 "test title",
                 BoardStatus.SELLING,
                 product,
-                1,
-                "test brand name",
                 1000,
-                3
+                3,
+                9
         );
-
+        optionRepo.save(option);
         productRepo.save(product);
         boardRepo.save(board);
     }
 
+    //TODO 현재 문제: 1. createdAt이 null
     @Test
     @DisplayName("Find All Boards")
     void findAllTest() {
@@ -80,6 +94,9 @@ class BoardServiceTest {
         System.out.println(res.toString());
         assertThat(res.isEmpty(), is(false));
         assertThat(res.size(), is(1));
+        assertThat(res.getFirst().productBrand(), is(option.getName()));
+        assertThat(res.getFirst().title(), is(board.getTitle()));
+        assertThat(res.getFirst().productName(), is(product.getName()));
     }
 
 }

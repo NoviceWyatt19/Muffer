@@ -18,6 +18,8 @@ class BoardTest {
                 "test name",
                 ProductCategory.HEADPHONE,
                 QualityGrade.A,
+                1,
+                null,
                 "serial code",
                 false,
                 4,
@@ -35,10 +37,9 @@ class BoardTest {
                 "test title",
                 BoardStatus.SELLING,
                 product,
-                1,
-                "test brand name",
                 1000,
-                3
+                3,
+                1
         );
 
         System.out.println(board.toString());
