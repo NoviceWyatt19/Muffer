@@ -28,6 +28,9 @@ public class Product extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private QualityGrade qualityGrade;
 
+    private Integer brandOptionId;
+    private String customBrand;
+
     private String serialCode;
     private boolean isSecondedHand;
     private int usePeriod;
@@ -46,12 +49,15 @@ public class Product extends BaseEntity {
 
     @Builder
     private Product(String name, ProductCategory category, QualityGrade qualityGrade,
+                    Integer brandOptionId, String customBrand,
                     String serialCode, boolean isSecondedHand, int usePeriod, boolean isDamaged,
                     String damagedInfo, String driver, ChargeType chargeType, MicType micType,
                     String connectType, float batteryTime, boolean canWire, boolean canWireless) {
         this.name = name;
         this.category = category;
         this.qualityGrade = qualityGrade;
+        this.brandOptionId = brandOptionId;
+        this.customBrand = customBrand;
         this.serialCode = serialCode;
         this.isSecondedHand = isSecondedHand;
         this.usePeriod = usePeriod;
@@ -67,6 +73,7 @@ public class Product extends BaseEntity {
     }
 
     public static Product create(String name, ProductCategory category, QualityGrade qualityGrade,
+                                 Integer brandOptionId, String customBrand,
                                  String serialCode, boolean isSecondedHand, int usePeriod, boolean isDamaged,
                                  String damagedInfo, String driver, ChargeType chargeType, MicType micType,
                                  String connectType, float batteryTime, boolean canWire, boolean canWireless) {
@@ -74,6 +81,8 @@ public class Product extends BaseEntity {
                 .name(name)
                 .category(category)
                 .qualityGrade(qualityGrade)
+                .brandOptionId(brandOptionId)
+                .customBrand(customBrand)
                 .serialCode(serialCode)
                 .isSecondedHand(isSecondedHand)
                 .usePeriod(usePeriod)
@@ -97,6 +106,8 @@ public class Product extends BaseEntity {
                 ", name='" + name + '\'' +
                 ", category=" + category +
                 ", qualityGrade=" + qualityGrade +
+                ", brandOptionId=" + brandOptionId +
+                ", customBrand='" + customBrand + '\'' +
                 ", serialCode='" + serialCode + '\'' +
                 ", isSecondedHand=" + isSecondedHand +
                 ", usePeriod=" + usePeriod +
