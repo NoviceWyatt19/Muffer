@@ -1,5 +1,6 @@
 package io.github.wyatt.muffer.domain.board;
 
+import io.github.wyatt.muffer.domain.board.code.BoardStatus;
 import io.github.wyatt.muffer.domain.board.entity.Board;
 import io.github.wyatt.muffer.domain.board.repository.BoardRepo;
 import io.github.wyatt.muffer.domain.board.repository.ProductRepo;
@@ -37,7 +38,6 @@ public class BoardService {
         return brandName;
     }
 
-    //TODO memberId 적용
     @Transactional
     public void saveBoard(BoardSvReq req, int memberId) {
         log.debug("save board info -> {}", req.toString());
@@ -48,4 +48,10 @@ public class BoardService {
         );
     }
 
+    @Transactional
+    public void updateState(int boardId, BoardStatus state) {
+        Board board = brdRepo.findById(boardId).orElseThrow();
+        board.changeStatus(state);
+        log.info("board id{}: update state -> {}", boardId, state);
+    }
 }

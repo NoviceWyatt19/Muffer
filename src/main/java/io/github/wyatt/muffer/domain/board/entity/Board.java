@@ -61,4 +61,8 @@ public class Board extends BaseEntity {
                 ", product=" + product.toString() +
                 '}';
     }
+
+    public void changeStatus(BoardStatus state) {
+        this.status = state;
+    }
 }

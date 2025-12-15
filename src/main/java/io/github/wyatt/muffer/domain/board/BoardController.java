@@ -1,5 +1,6 @@
 package io.github.wyatt.muffer.domain.board;
 
+import io.github.wyatt.muffer.domain.board.code.BoardStatus;
 import io.github.wyatt.muffer.domain.board.request.BoardFilterReq;
 import io.github.wyatt.muffer.domain.board.request.BoardSvReq;
 import lombok.RequiredArgsConstructor;
@@ -25,5 +26,14 @@ public class BoardController {
     public ResponseEntity<?> createBoard(@PathVariable("memberId") int memberId, @RequestBody BoardSvReq req) {
         boardService.saveBoard(req, memberId);
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("message", "success"));
+    }
+
+    @PatchMapping("{boardId}/state")
+    public ResponseEntity<?> updateState(
+            @PathVariable int boardId,
+            @RequestParam BoardStatus state
+    ) {
+        boardService.updateState(boardId, state);
+        return ResponseEntity.ok().build();
     }
 }
