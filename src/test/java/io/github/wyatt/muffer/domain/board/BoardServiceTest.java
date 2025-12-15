@@ -13,9 +13,7 @@ import io.github.wyatt.muffer.domain.board.response.BoardListRes;
 import io.github.wyatt.muffer.domain.option.Option;
 import io.github.wyatt.muffer.domain.option.OptionRepo;
 import io.github.wyatt.muffer.domain.option.OptionType;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -30,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
+@TestMethodOrder(value = MethodOrderer.OrderAnnotation.class)
 class BoardServiceTest {
 
     @Autowired
@@ -52,11 +51,12 @@ class BoardServiceTest {
     @BeforeEach
     void setUp() {
         option = Option.create(OptionType.BRAND, "test brand");
+        optionRepo.save(option);
         product = Product.create(
                 "test product name",
                 ProductCategory.HEADPHONE,
                 QualityGrade.A,
-                1,
+                option.getId(),
                 null,
                 "serial code",
                 false,
@@ -71,6 +71,7 @@ class BoardServiceTest {
                 true,
                 false
         );
+        productRepo.save(product);
         board = Board.create(
                 "test title",
                 BoardStatus.SELLING,
@@ -79,13 +80,18 @@ class BoardServiceTest {
                 3,
                 9
         );
-        optionRepo.save(option);
-        productRepo.save(product);
         boardRepo.save(board);
     }
 
-    //TODO 현재 문제: 1. createdAt이 null
+    @AfterEach
+    void init() {
+        boardRepo.deleteAll();
+        productRepo.deleteAll();
+        optionRepo.deleteAll();
+    }
+
     @Test
+    @Order(1)
     @DisplayName("Find All Boards")
     void findAllTest() {
         BoardFilterReq req = new BoardFilterReq();
@@ -96,6 +102,16 @@ class BoardServiceTest {
         assertThat(res.getFirst().productBrand(), is(option.getName()));
         assertThat(res.getFirst().title(), is(board.getTitle()));
         assertThat(res.getFirst().productName(), is(product.getName()));
+        Board checkBoard = boardRepo.findById(board.getId()).get();
+    }
+
+    @Test
+    @Order(2)
+    @DisplayName("Update Board State")
+    void updateStateTest() {
+        boardService.updateState(board.getId(), BoardStatus.DEAL_AGREED);
+        Board updatedBoard = boardRepo.findById(board.getId()).get();
+        assertThat(updatedBoard.getStatus(), is(BoardStatus.DEAL_AGREED));
     }
 
 }
