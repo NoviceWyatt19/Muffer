@@ -1,7 +1,9 @@
 package io.github.wyatt.muffer.domain.board.entity;
 
 import io.github.wyatt.muffer.domain.board.code.BoardStatus;
+import io.github.wyatt.muffer.global.config.ErrorCode;
 import io.github.wyatt.muffer.global.entity.BaseEntity;
+import io.github.wyatt.muffer.global.exceptions.ForbiddenModifyException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -62,7 +64,10 @@ public class Board extends BaseEntity {
                 '}';
     }
 
-    public void changeStatus(BoardStatus state) {
+    public void changeStatus(BoardStatus state) throws ForbiddenModifyException {
+        if(this.status == BoardStatus.SOLD_OUT || this.status == BoardStatus.DEAL_AGREED) {
+            throw new ForbiddenModifyException(ErrorCode.FORBIDDEN_MODIFY);
+        }
         this.status = state;
     }
 }

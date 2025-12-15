@@ -8,6 +8,8 @@ import io.github.wyatt.muffer.domain.board.request.BoardFilterReq;
 import io.github.wyatt.muffer.domain.board.request.BoardSvReq;
 import io.github.wyatt.muffer.domain.board.response.BoardListRes;
 import io.github.wyatt.muffer.domain.option.OptionRepo;
+import io.github.wyatt.muffer.global.config.ErrorCode;
+import io.github.wyatt.muffer.global.exceptions.BusinessAccessDeniedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -49,8 +51,11 @@ public class BoardService {
     }
 
     @Transactional
-    public void updateState(int boardId, BoardStatus state) {
+    public void updateState(int memberId, int boardId, BoardStatus state) {
         Board board = brdRepo.findById(boardId).orElseThrow();
+        if (board.getMemberId() != memberId) {
+            throw new BusinessAccessDeniedException(ErrorCode.OTHER_USER);
+        }
         board.changeStatus(state);
         log.info("board id{}: update state -> {}", boardId, state);
     }
