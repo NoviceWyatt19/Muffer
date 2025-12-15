@@ -13,6 +13,8 @@ import io.github.wyatt.muffer.domain.board.response.BoardListRes;
 import io.github.wyatt.muffer.domain.option.Option;
 import io.github.wyatt.muffer.domain.option.OptionRepo;
 import io.github.wyatt.muffer.domain.option.OptionType;
+import io.github.wyatt.muffer.global.exceptions.BusinessAccessDeniedException;
+import io.github.wyatt.muffer.global.exceptions.ForbiddenModifyException;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -109,9 +111,24 @@ class BoardServiceTest {
     @Order(2)
     @DisplayName("Update Board State")
     void updateStateTest() {
-        boardService.updateState(board.getId(), BoardStatus.DEAL_AGREED);
+        boardService.updateState(board.getMemberId(), board.getId(), BoardStatus.DEAL_AGREED);
         Board updatedBoard = boardRepo.findById(board.getId()).get();
         assertThat(updatedBoard.getStatus(), is(BoardStatus.DEAL_AGREED));
+    }
+
+    @Test
+    @Order(3)
+    @DisplayName("Can not modify state from SOLD_OUT or DEAL_AGREED")
+    void forbiddenModifyStateTest() {
+        boardService.updateState(board.getMemberId(), board.getId(), BoardStatus.SOLD_OUT);
+        assertThrows(ForbiddenModifyException.class, () -> boardService.updateState(board.getMemberId(), board.getId(), BoardStatus.DEAL_AGREED));
+    }
+
+    @Test
+    @Order(4)
+    @DisplayName("Can not modify board state from other member")
+    void forbiddenModifyStateFromOtherMemberTest() {
+        assertThrows(BusinessAccessDeniedException.class, () -> boardService.updateState(1, board.getId(), BoardStatus.HIDDEN));
     }
 
 }
