@@ -28,7 +28,7 @@ public class BoardService {
     private  final OptionRepo optRepo;
 
     public List<BoardListRes> getBoards(BoardFilterReq res) {
-        List<Board> boards = brdRepo.findAll();
+        List<Board> boards = brdRepo.findAllWithoutHidden();
 
         return boards.stream().map( (board) -> BoardListRes.from(board, getBrand(board.getProduct().getBrandOptionId(),  board.getProduct().getCustomBrand())) ).toList();
     }

@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
-@TestMethodOrder(value = MethodOrderer.OrderAnnotation.class)
+//@TestMethodOrder(value = MethodOrderer.OrderAnnotation.class)
 class BoardServiceTest {
 
     @Autowired
@@ -93,7 +93,6 @@ class BoardServiceTest {
     }
 
     @Test
-    @Order(1)
     @DisplayName("Find All Boards")
     void findAllTest() {
         BoardFilterReq req = new BoardFilterReq();
@@ -108,7 +107,14 @@ class BoardServiceTest {
     }
 
     @Test
-    @Order(2)
+    @DisplayName("Can not find hidden board")
+    void findHiddenBoardTest() {
+        boardService.updateState(board.getMemberId(), board.getId(), BoardStatus.HIDDEN);
+        List<BoardListRes> res = boardService.getBoards(new BoardFilterReq());
+        assertThat(res.isEmpty(), is(true));
+    }
+
+    @Test
     @DisplayName("Update Board State")
     void updateStateTest() {
         boardService.updateState(board.getMemberId(), board.getId(), BoardStatus.DEAL_AGREED);
@@ -117,7 +123,6 @@ class BoardServiceTest {
     }
 
     @Test
-    @Order(3)
     @DisplayName("Can not modify state from SOLD_OUT or DEAL_AGREED")
     void forbiddenModifyStateTest() {
         boardService.updateState(board.getMemberId(), board.getId(), BoardStatus.SOLD_OUT);
@@ -125,7 +130,6 @@ class BoardServiceTest {
     }
 
     @Test
-    @Order(4)
     @DisplayName("Can not modify board state from other member")
     void forbiddenModifyStateFromOtherMemberTest() {
         assertThrows(BusinessAccessDeniedException.class, () -> boardService.updateState(1, board.getId(), BoardStatus.HIDDEN));
