@@ -9,7 +9,7 @@ import lombok.Getter;
 @Getter
 public class Option extends BaseEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    int id;
+    Long id;
 
     @Enumerated(EnumType.STRING)
     OptionType type;

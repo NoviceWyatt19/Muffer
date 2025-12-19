@@ -10,6 +10,7 @@ import io.github.wyatt.muffer.domain.board.response.BoardListRes;
 import io.github.wyatt.muffer.domain.option.OptionRepo;
 import io.github.wyatt.muffer.global.config.ErrorCode;
 import io.github.wyatt.muffer.global.exceptions.BusinessAccessDeniedException;
+import io.github.wyatt.muffer.global.exceptions.BusinessNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -52,11 +53,22 @@ public class BoardService {
 
     @Transactional
     public void updateState(Long memberId, Long boardId, BoardStatus state) {
-        Board board = brdRepo.findById(boardId).orElseThrow();
+        Board board = brdRepo.findById(boardId).orElseThrow(
+                () -> new BusinessNotFoundException(ErrorCode.NOT_FOUND_DATA)
+        );
         if (board.getMemberId() != memberId) {
             throw new BusinessAccessDeniedException(ErrorCode.OTHER_USER);
         }
         board.changeStatus(state);
         log.info("board id{}: update state -> {}", boardId, state);
+    }
+
+    public void validateSeller(Long boardId, Long requesterId) {
+        Board board = brdRepo.findById(boardId).orElseThrow(
+                () -> new BusinessNotFoundException(ErrorCode.NOT_FOUND_DATA)
+        );
+        if ( !requesterId.equals(board.getMemberId()) ) {
+            throw new BusinessAccessDeniedException(ErrorCode.OTHER_USER);
+        }
     }
 }

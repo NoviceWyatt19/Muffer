@@ -53,4 +53,7 @@ public class Offer {
         this.status = OfferStatus.ACCEPT;
     }
 
+    public void changeState(OfferStatus status) {
+        this.status = status;
+    }
 }

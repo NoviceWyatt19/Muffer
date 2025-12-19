@@ -6,8 +6,8 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-public interface OptionRepo extends JpaRepository<Option, Integer> {
+public interface OptionRepo extends JpaRepository<Option, Long> {
 
     @Query("select o.name from Option o where o.id = :brandId")
-    Optional<String>  findNameById(@Param("brandId") int brandId);
+    Optional<String>  findNameById(@Param("brandId") Long brandId);
 }

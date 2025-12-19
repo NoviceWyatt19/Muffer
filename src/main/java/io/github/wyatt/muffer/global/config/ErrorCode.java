@@ -6,7 +6,8 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum ErrorCode {
     FORBIDDEN_MODIFY("4031", HttpStatus.FORBIDDEN, "허용되지 않는 수정 요청입니다."),
-    OTHER_USER("4032", HttpStatus.FORBIDDEN, "해당 리소스에 대한 권한이 없습니다.");
+    OTHER_USER("4032", HttpStatus.FORBIDDEN, "해당 리소스에 대한 권한이 없습니다."),
+    NOT_FOUND_DATA("4041", HttpStatus.NOT_FOUND, "해당 데이터를 찾지 못했습니다.");
 
 
     private final String errorCode;
