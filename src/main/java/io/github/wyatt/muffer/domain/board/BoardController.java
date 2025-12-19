@@ -28,18 +28,18 @@ public class BoardController {
     }
 
     @PostMapping("/{memberId}/create")
-    public ResponseEntity<?> createBoard(@PathVariable("memberId") int memberId, @RequestBody BoardSvReq req) {
+    public ResponseEntity<?> createBoard(@PathVariable("memberId") Long memberId, @RequestBody BoardSvReq req) {
         boardService.saveBoard(req, memberId);
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("message", "success"));
     }
 
     @PatchMapping("{boardId}/state")
     public ResponseEntity<?> updateState(
-            @PathVariable int boardId,
+            @PathVariable Long boardId,
             @RequestParam BoardStatus state
     ) {
         //NOTE 추후 PASETO 붙이면 거기서 memberId 가져오기
-        int memberId = 1;
+        Long memberId = 1L;
         boardService.updateState(memberId, boardId, state);
         return ResponseEntity.ok().build();
     }

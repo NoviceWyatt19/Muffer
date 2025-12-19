@@ -39,7 +39,7 @@ class BoardTest {
                 product,
                 1000,
                 3,
-                1
+                1L
         );
 
         System.out.println(board.toString());

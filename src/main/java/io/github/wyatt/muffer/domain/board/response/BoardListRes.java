@@ -7,8 +7,8 @@ import java.time.LocalDateTime;
 
 public record BoardListRes(
         String title,
-        int sellerId,
-        int productId,
+        Long sellerId,
+        Long productId,
         String sellerName,
         BoardStatus status,
         String productBrand,

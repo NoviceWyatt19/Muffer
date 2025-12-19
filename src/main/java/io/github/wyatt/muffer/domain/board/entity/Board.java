@@ -15,13 +15,13 @@ import lombok.NoArgsConstructor;
 public class Board extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
-    private int memberId;
+    private Long memberId;
 
     private String title;
 
@@ -32,7 +32,7 @@ public class Board extends BaseEntity {
     private int exposureLevel;
 
     @Builder
-    private Board(Product product, String title, BoardStatus status, int initialPrice, int exposureLevel,  int memberId) {
+    private Board(Product product, String title, BoardStatus status, int initialPrice, int exposureLevel,  Long memberId) {
         this.title = title;
         this.status = status;
         this.product = product;
@@ -41,7 +41,7 @@ public class Board extends BaseEntity {
         this.memberId = memberId;
     }
 
-    public static Board create(String title, BoardStatus status, Product product, int initialPrice, int exposureLevel, int memberId){
+    public static Board create(String title, BoardStatus status, Product product, int initialPrice, int exposureLevel, Long memberId){
         return Board.builder()
                 .title(title)
                 .status(status)

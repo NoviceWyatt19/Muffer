@@ -52,7 +52,7 @@ public record BoardSvReq(
         );
     }
 
-    public Board toEntity(Product product, int memberId) {
+    public Board toEntity(Product product, Long memberId) {
         return Board.create(
                 title,
                 BoardStatus.SELLING,

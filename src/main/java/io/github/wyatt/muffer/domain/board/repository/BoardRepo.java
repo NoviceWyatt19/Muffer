@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface BoardRepo extends JpaRepository<Board, Integer> {
+public interface BoardRepo extends JpaRepository<Board, Long> {
 
     @Modifying
     @Query("update Board b set b.status = :state where b.id = :boardId")

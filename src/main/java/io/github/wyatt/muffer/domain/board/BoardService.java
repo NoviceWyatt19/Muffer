@@ -41,7 +41,7 @@ public class BoardService {
     }
 
     @Transactional
-    public void saveBoard(BoardSvReq req, int memberId) {
+    public void saveBoard(BoardSvReq req, Long memberId) {
         log.debug("save board info -> {}", req.toString());
         var product = req.extractProduct();
         pdtRepo.save(product);
@@ -51,7 +51,7 @@ public class BoardService {
     }
 
     @Transactional
-    public void updateState(int memberId, int boardId, BoardStatus state) {
+    public void updateState(Long memberId, Long boardId, BoardStatus state) {
         Board board = brdRepo.findById(boardId).orElseThrow();
         if (board.getMemberId() != memberId) {
             throw new BusinessAccessDeniedException(ErrorCode.OTHER_USER);

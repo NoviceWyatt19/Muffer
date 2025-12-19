@@ -80,7 +80,7 @@ class BoardServiceTest {
                 product,
                 1000,
                 3,
-                9
+                9L
         );
         boardRepo.save(board);
     }
@@ -132,7 +132,7 @@ class BoardServiceTest {
     @Test
     @DisplayName("Can not modify board state from other member")
     void forbiddenModifyStateFromOtherMemberTest() {
-        assertThrows(BusinessAccessDeniedException.class, () -> boardService.updateState(1, board.getId(), BoardStatus.HIDDEN));
+        assertThrows(BusinessAccessDeniedException.class, () -> boardService.updateState(1L, board.getId(), BoardStatus.HIDDEN));
     }
 
 }
