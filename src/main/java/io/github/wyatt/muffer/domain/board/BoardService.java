@@ -33,7 +33,7 @@ public class BoardService {
         return boards.stream().map( (board) -> BoardListRes.from(board, getBrand(board.getProduct().getBrandOptionId(),  board.getProduct().getCustomBrand())) ).toList();
     }
 
-    private String getBrand(Integer brandId, String customBrand) {
+    private String getBrand(Long brandId, String customBrand) {
 
         String brandName = optRepo.findNameById(brandId).orElse(customBrand);
         log.info("brand name -> {}", brandName);
