@@ -28,7 +28,7 @@ public class Product extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private QualityGrade qualityGrade;
 
-    private Integer brandOptionId;
+    private Long brandOptionId;
     private String customBrand;
 
     private String serialCode;
@@ -43,16 +43,16 @@ public class Product extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private MicType micType; // 마이크 타입
     private String connectType; // 연결방식
-    private float batteryTime;
+    private double batteryTime;
     private boolean canWire;
     private boolean canWireless;
 
     @Builder
     private Product(String name, ProductCategory category, QualityGrade qualityGrade,
-                    Integer brandOptionId, String customBrand,
+                    Long brandOptionId, String customBrand,
                     String serialCode, boolean isSecondedHand, int usePeriod, boolean isDamaged,
                     String damagedInfo, String driver, ChargeType chargeType, MicType micType,
-                    String connectType, float batteryTime, boolean canWire, boolean canWireless) {
+                    String connectType, double batteryTime, boolean canWire, boolean canWireless) {
         this.name = name;
         this.category = category;
         this.qualityGrade = qualityGrade;
@@ -73,10 +73,10 @@ public class Product extends BaseEntity {
     }
 
     public static Product create(String name, ProductCategory category, QualityGrade qualityGrade,
-                                 Integer brandOptionId, String customBrand,
+                                 Long brandOptionId, String customBrand,
                                  String serialCode, boolean isSecondedHand, int usePeriod, boolean isDamaged,
                                  String damagedInfo, String driver, ChargeType chargeType, MicType micType,
-                                 String connectType, float batteryTime, boolean canWire, boolean canWireless) {
+                                 String connectType, double batteryTime, boolean canWire, boolean canWireless) {
         return Product.builder()
                 .name(name)
                 .category(category)

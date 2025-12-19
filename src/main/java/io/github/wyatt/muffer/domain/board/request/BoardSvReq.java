@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 
 public record BoardSvReq(
         @NotBlank(message = "제목은 필수입니다.") String title,
-        Integer brandOptionId,
+        Long brandOptionId,
         String customBrand,
         @NotNull(message = "판매가격은 필수입니다.") int initialPrice,
         int exposureLevel,
@@ -24,7 +24,7 @@ public record BoardSvReq(
         ChargeType chargeType,
         MicType micType,
         String connectType,
-        float batteryTime,
+        double batteryTime,
         Boolean canWire,
         Boolean canWireless,
         QualityGrade qualityGrade

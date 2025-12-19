@@ -18,7 +18,7 @@ class BoardTest {
                 "test name",
                 ProductCategory.HEADPHONE,
                 QualityGrade.A,
-                1,
+                1L,
                 null,
                 "serial code",
                 false,
@@ -29,7 +29,7 @@ class BoardTest {
                 ChargeType.None,
                 null,
                 null,
-                60.5f,
+                60.5,
                 true,
                 false
         );

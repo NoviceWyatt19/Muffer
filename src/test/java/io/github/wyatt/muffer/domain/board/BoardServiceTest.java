@@ -69,7 +69,7 @@ class BoardServiceTest {
                 ChargeType.None,
                 null,
                 null,
-                60.5f,
+                60.5,
                 true,
                 false
         );
