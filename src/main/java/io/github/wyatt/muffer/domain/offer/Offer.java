@@ -11,7 +11,7 @@ public class Offer {
 
     private Long boardId;
     private Long bidderId;
-    private Integer counterOfferId;
+    private Long counterOfferId;
 
     @Enumerated(EnumType.STRING)
     private OfferStatus status;
@@ -23,7 +23,7 @@ public class Offer {
     private int suggestPrice;
 
     @Builder
-    private Offer(Long boardId, Long bidderId, Integer counterOfferId, OfferStatus status, TradeType tradeType, String location, int suggestPrice) {
+    private Offer(Long boardId, Long bidderId, Long counterOfferId, OfferStatus status, TradeType tradeType, String location, int suggestPrice) {
         this.boardId = boardId;
         this.bidderId = bidderId;
         this.counterOfferId = counterOfferId;
@@ -45,7 +45,7 @@ public class Offer {
                 .build();
     }
 
-    public void markAsCounterOffer(int counterOfferId) {
+    public void markAsCounterOffer(Long counterOfferId) {
         this.counterOfferId = counterOfferId;
     }
 
