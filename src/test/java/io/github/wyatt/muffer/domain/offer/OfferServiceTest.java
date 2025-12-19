@@ -9,6 +9,7 @@ import io.github.wyatt.muffer.domain.board.entity.Product;
 import io.github.wyatt.muffer.domain.board.repository.BoardRepo;
 import io.github.wyatt.muffer.domain.board.repository.ProductRepo;
 import io.github.wyatt.muffer.domain.offer.request.ChgStateReq;
+import io.github.wyatt.muffer.domain.offer.request.OfrSvReq;
 import io.github.wyatt.muffer.domain.offer.response.OfrListRes;
 import io.github.wyatt.muffer.global.exceptions.BusinessAccessDeniedException;
 import org.junit.jupiter.api.AfterEach;
@@ -107,14 +108,9 @@ class OfferServiceTest {
     @Test
     @DisplayName("Can save offer")
     void saveOfferTest() {
-        Offer newOffer = Offer.create(
-                ofr.getBoardId(),
-                2L,
-                null,
-                null,
-                10
-        );
-        ofrService.saveOffer(newOffer);
+        Long requesterId = 2L;
+        OfrSvReq req = new OfrSvReq(TradeType.DELIVERY, "test location", 19000);
+        ofrService.saveOffer(brd.getId(), 2L, req);
         assertThat(ofrService.getOfferList(ofr.getBoardId(), null).size(), is(2));
     }
 

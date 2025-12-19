@@ -3,6 +3,7 @@ package io.github.wyatt.muffer.domain.offer;
 import io.github.wyatt.muffer.domain.board.BoardService;
 import io.github.wyatt.muffer.domain.offer.request.ChgStateReq;
 import io.github.wyatt.muffer.domain.offer.request.OfrFilterReq;
+import io.github.wyatt.muffer.domain.offer.request.OfrSvReq;
 import io.github.wyatt.muffer.domain.offer.response.OfrListRes;
 import io.github.wyatt.muffer.global.config.ErrorCode;
 import io.github.wyatt.muffer.global.exceptions.BusinessNotFoundException;
@@ -23,9 +24,9 @@ public class OfferService {
     private final OfferRepo ofrRepo;
 
     @Transactional
-    public void saveOffer(Offer offer) {
-        ofrRepo.save(offer);
-        log.info("save offer -> {}", offer);
+    public void saveOffer(Long boardId, Long requesterId,OfrSvReq req) {
+        ofrRepo.save(req.toEntity(boardId, requesterId));
+        log.info("save offer -> {}", req);
     }
 
     public List<OfrListRes> getOfferList(Long boardId, OfrFilterReq req) {
