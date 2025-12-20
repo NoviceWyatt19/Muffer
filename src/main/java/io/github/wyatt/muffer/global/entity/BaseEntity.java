@@ -19,7 +19,7 @@ public class BaseEntity {
     protected LocalDateTime modifiedAt;
     protected LocalDateTime deletedAt;
 
-    public void deActivated() {
+    public void deactivated() {
         this.deletedAt = LocalDateTime.now();
     }
     public Boolean isActivated() {
