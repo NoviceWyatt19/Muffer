@@ -14,3 +14,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+# MUST BE DIFFERENT to application-prod
+paseto:
+  secret: "Z9fQmA7Lx3P2sJ8kTnWcR4D0eE6VhU5BKyM1HqNopYtSaIbFdrCg"

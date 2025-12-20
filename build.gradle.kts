@@ -36,9 +36,9 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
 
     // Authentication / Token (PASETO)
-    implementation("dev.paseto:jpaseto-api")
-    runtimeOnly("dev.paseto:jpaseto-impl")
-    runtimeOnly("dev.paseto:jpaseto-jackson")
+    implementation("dev.paseto:jpaseto-api:0.7.0")
+    runtimeOnly("dev.paseto:jpaseto-impl:0.7.0")
+    runtimeOnly("dev.paseto:jpaseto-jackson:0.7.0")
 
     // Build / Utils
     compileOnly("org.projectlombok:lombok")
