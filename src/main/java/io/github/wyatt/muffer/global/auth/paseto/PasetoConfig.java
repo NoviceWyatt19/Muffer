@@ -3,12 +3,14 @@ package io.github.wyatt.muffer.global.auth.paseto;
 import dev.paseto.jpaseto.PasetoParser;
 import dev.paseto.jpaseto.Pasetos;
 import dev.paseto.jpaseto.lang.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.crypto.SecretKey;
 
+@Slf4j
 @Configuration
 public class PasetoConfig {
 

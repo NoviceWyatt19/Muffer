@@ -31,7 +31,7 @@ public class AuthenticationAspect {
             throw new AuthenticationException("Invalid authorization header");
         }
 
-        String token = authHeader.split(" ")[1]; // "Bearer "제거
+        String token = authHeader.substring(7); // "Bearer "제거
         try {
             String subject = parser.parse(token).getClaims().getSubject();
             // 인증 토큰 발행

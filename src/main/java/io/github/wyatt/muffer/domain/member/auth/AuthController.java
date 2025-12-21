@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,9 +29,10 @@ public class AuthController {
     }
 
    @PostMapping("/sign-out")
-    public void signOut() {
-        Long memberId = 1L;
-        authService.signOut(memberId);
+    public void signOut(
+            @AuthenticationPrincipal CustomUserDetails user
+   ) {
+        authService.signOut(user.member().getId());
     }
 
     /*

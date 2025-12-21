@@ -1,5 +1,6 @@
 package io.github.wyatt.muffer.global.config;
 
+import io.github.wyatt.muffer.domain.member.auth.CustomUserDetailsService;
 import io.github.wyatt.muffer.global.auth.filter.CustomLoginFilter;
 import io.github.wyatt.muffer.global.auth.filter.PasetoAuthenticationFilter;
 import io.github.wyatt.muffer.global.auth.paseto.PasetoProvider;
@@ -7,9 +8,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,15 +25,22 @@ public class SecurityConfig {
 
     private final PasetoProvider pasetoProvider;
     private final AuthenticationConfiguration authConfig;
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
-    }
+    private final CustomUserDetailsService userDetailsService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(HttpSecurity http, PasswordEncoder passwordEncoder) throws Exception {
+        AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
+
+        // 매니저에게 유저를 찾는 방법과 비밀번호 비교 방법을 알려줌
+        builder.userDetailsService(userDetailsService)
+                .passwordEncoder(passwordEncoder);
+
+        return builder.build();
     }
 
     @Bean
@@ -47,16 +57,22 @@ public class SecurityConfig {
                 session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         );
+
+        // H2 Console iframe 허용
+        http.headers(headers ->
+                headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable)
+        );
         // 경로별 인가 설정 (추후 세부화)
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers("/login", "/join").permitAll()
+                .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().permitAll()
         );
 
         // 필터 추가
         http
-            .addFilterAt(new CustomLoginFilter(authenticationManager(authConfig), pasetoProvider),
+            .addFilterAt(new CustomLoginFilter(authenticationManager(http, passwordEncoder()), pasetoProvider),
                     UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(new PasetoAuthenticationFilter(pasetoProvider),
                     CustomLoginFilter.class);

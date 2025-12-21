@@ -54,7 +54,9 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
         CustomUserDetails userDetails = (CustomUserDetails) authResult.getPrincipal();
         String token = pasetoProvider.createToken(userDetails);
         response.addHeader("Authorization", "Bearer " + token);
-//        super.successfulAuthentication(request, response, chain, authResult);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write("{\"message\": \"로그인 성공\"}");
     }
 
     /**

@@ -4,6 +4,8 @@ import dev.paseto.jpaseto.Claims;
 import dev.paseto.jpaseto.PasetoParser;
 import dev.paseto.jpaseto.Pasetos;
 import io.github.wyatt.muffer.domain.member.auth.CustomUserDetails;
+import io.github.wyatt.muffer.domain.member.auth.CustomUserDetailsService;
+import io.github.wyatt.muffer.domain.member.auth.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,7 +28,7 @@ public class PasetoProvider {
 
     private final PasetoParser parser;
     private final SecretKey secretKey;
-//    private final PasetoConfig config; //NOTE config.secretKey()와 SecretKey 의 secretKey 가 동일한지 확인 후 제거
+    private final CustomUserDetailsService userDetailsService;
 
     /**
      * 토큰 생성
@@ -50,15 +52,18 @@ public class PasetoProvider {
     }
 
     public Authentication getAuthentication(String token) {
-        String username = parser.parse(token).getClaims().getSubject();
         Claims claims = parser.parse(token).getClaims();
+        String username = claims.getSubject();
+        Long userId = claims.get("userId", Long.class);
         String rowAuthString = claims.get("authorities", String.class);
         Collection<? extends GrantedAuthority> authorities =
                 Arrays.stream(rowAuthString.split(","))
                         .map(SimpleGrantedAuthority::new)
                         .toList();
 
-        return new UsernamePasswordAuthenticationToken(username, "", authorities);
+        UserPrincipal principal = new UserPrincipal(userId, username, authorities);
+
+        return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
 
     public boolean validateToken(String token) {

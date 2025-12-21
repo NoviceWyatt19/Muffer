@@ -20,7 +20,7 @@ public class PasetoAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
-        return path.equals("/") || path.startsWith("/css") || path.startsWith("/js");
+        return path.equals("/") || path.startsWith("/css") || path.startsWith("/js") || path.startsWith("/h2-console");
     }
 
     @Override
@@ -32,7 +32,7 @@ public class PasetoAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-        String token = authorization.split(" ")[1];
+        String token = authorization.substring(7);
         // 토큰 유효성 검사
         if (pasetoProvider.validateToken(token)) {
             Authentication authentication = pasetoProvider.getAuthentication(token);
