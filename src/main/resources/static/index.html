@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Muffer API Tester</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <style>
+    :root { --primary: #3b82f6; --bg: #f3f4f6; --text: #1f2937; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace; padding: 20px; background-color: var(--bg); color: var(--text); }
+    .app-container { max-width: 1200px; margin: 0 auto; }
+
+    /* Layout */
+    .main-layout { display: flex; gap: 20px; }
+    .content-panel { flex: 2; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .log-panel { flex: 1; background: #1e1e1e; padding: 15px; border-radius: 8px; color: #00ff00; height: 85vh; overflow-y: auto; font-family: monospace; font-size: 12px; white-space: pre-wrap; display: flex; flex-direction: column;}
+
+    /* Components */
+    h1, h2, h3 { margin-top: 0; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+    .tab-btn { padding: 10px 20px; border: none; background: #e5e7eb; cursor: pointer; border-radius: 4px; font-weight: bold; }
+    .tab-btn.active { background: var(--primary); color: white; }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .full-width { grid-column: span 2; }
+
+    label { display: block; margin-bottom: 4px; font-size: 0.9em; font-weight: 600; color: #4b5563; }
+    input, select { width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; box-sizing: border-box; }
+    input[type="checkbox"] { width: auto; margin-right: 5px; }
+
+    button.action-btn { width: 100%; padding: 10px; background-color: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+    button.action-btn:hover { opacity: 0.9; }
+    button.sm { width: auto; padding: 5px 10px; font-size: 0.8em; margin-right: 5px; }
+    button.danger { background-color: #ef4444; }
+    button.success { background-color: #10b981; }
+
+    /* Board Table */
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9em; }
+    th, td { border: 1px solid #e5e7eb; padding: 8px; text-align: left; }
+    th { background-color: #f9fafb; }
+    .status-badge { padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: bold; }
+    .status-SELLING { background: #dbeafe; color: #1e40af; }
+    .status-SOLD_OUT { background: #fee2e2; color: #991b1b; }
+    .status-HIDDEN { background: #f3f4f6; color: #374151; }
+  </style>
+</head>
+<body>
+
+<div id="app" class="app-container">
+  <div style="display: flex; justify-content: space-between; align-items: center;">
+    <h1>Muffer Backend Tester</h1>
+    <div v-if="isLoggedIn">
+      <span style="font-size: 0.9em; color: green; font-weight: bold;">● Authenticated</span>
+      <button @click="logout" class="action-btn sm danger" style="margin-left: 10px;">Logout</button>
+    </div>
+    <div v-else>
+      <span style="font-size: 0.9em; color: red; font-weight: bold;">○ Not Logged In</span>
+    </div>
+  </div>
+
+  <div class="main-layout">
+    <div class="content-panel">
+      <div class="tabs">
+        <button class="tab-btn" :class="{active: currentTab === 'AUTH'}" @click="currentTab='AUTH'">Auth & User</button>
+        <button class="tab-btn" :class="{active: currentTab === 'BOARD'}" @click="currentTab='BOARD'">Board (Market)</button>
+      </div>
+
+      <div v-if="currentTab === 'AUTH'">
+        <h3>Authentication</h3>
+        <div v-if="!isLoggedIn" class="form-grid">
+          <div>
+            <h4>Login</h4>
+            <form @submit.prevent="login">
+              <label>Email</label> <input v-model="loginForm.username" type="email" required>
+              <label>Password</label> <input v-model="loginForm.password" type="password" required>
+              <button class="action-btn">Login</button>
+            </form>
+          </div>
+          <div>
+            <h4>Sign Up</h4>
+            <form @submit.prevent="signUp">
+              <label>Email</label> <input v-model="signUpForm.email" type="email">
+              <label>Password</label> <input v-model="signUpForm.password" type="password">
+              <label>Name</label> <input v-model="signUpForm.name">
+              <label>Nickname</label> <input v-model="signUpForm.nickname">
+              <label>Phone</label> <input v-model="signUpForm.phone">
+              <button class="action-btn success">Sign Up</button>
+            </form>
+          </div>
+        </div>
+        <div v-else>
+          <p>현재 로그인된 토큰값 (Paseto):</p>
+          <textarea readonly style="width:100%; height: 100px; font-size:11px; color:#555;">{{ token }}</textarea>
+          <button @click="serverLogout" class="action-btn danger">Server Logout API</button>
+        </div>
+      </div>
+
+      <div v-if="currentTab === 'BOARD'">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h3>Board List</h3>
+          <button @click="fetchBoards" class="action-btn sm">Refresh List</button>
+        </div>
+
+        <table>
+          <thead>
+          <tr>
+            <th>ID</th>
+            <th>Status</th>
+            <th>Title / Product</th>
+            <th>Price</th>
+            <th>Seller</th>
+            <th>Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr v-for="b in boardList" :key="b.productId">
+            <td>{{ b.productId }}</td>
+            <td><span class="status-badge" :class="'status-' + b.status">{{ b.status }}</span></td>
+            <td>
+              <strong>{{ b.title }}</strong><br>
+              <span style="color:#666; font-size:0.8em;">{{ b.productBrand }} / {{ b.productName }}</span>
+            </td>
+            <td>{{ b.initialPrice.toLocaleString() }}원</td>
+            <td>{{ b.sellerName }}</td>
+            <td>
+              <button @click="updateState(b.productId, 'SELLING')" class="action-btn sm success">Sell</button>
+              <button @click="updateState(b.productId, 'SOLD_OUT')" class="action-btn sm danger">Sold</button>
+              <button @click="updateState(b.productId, 'HIDDEN')" class="action-btn sm">Hide</button>
+            </td>
+          </tr>
+          <tr v-if="boardList.length === 0">
+            <td colspan="6" style="text-align: center; color: #888;">No boards found.</td>
+          </tr>
+          </tbody>
+        </table>
+
+        <hr style="margin: 30px 0;">
+
+        <h3>Create New Board</h3>
+        <div v-if="!isLoggedIn" style="background: #fee2e2; color: #991b1b; padding: 10px; border-radius: 4px; text-align: center;">
+          게시글을 작성하려면 먼저 로그인이 필요합니다.
+        </div>
+        <form v-else @submit.prevent="createBoard">
+          <div class="form-grid">
+            <div class="full-width">
+              <label>Title</label>
+              <input v-model="boardForm.title" placeholder="게시글 제목" required>
+            </div>
+
+            <div>
+              <label>Product Name</label>
+              <input v-model="boardForm.productName" required>
+            </div>
+            <div>
+              <label>Price</label>
+              <input v-model="boardForm.initialPrice" type="number" required>
+            </div>
+
+            <div>
+              <label>Category</label>
+              <select v-model="boardForm.productCategory">
+                <option value="HEADPHONE">HEADPHONE</option>
+                <option value="SPEAKER">SPEAKER</option>
+                <option value="MIC">MIC</option>
+              </select>
+            </div>
+            <div>
+              <label>Quality Grade</label>
+              <select v-model="boardForm.qualityGrade">
+                <option value="A">A (S급)</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+                <option value="E">E</option>
+              </select>
+            </div>
+
+            <div><label>Brand Name (Custom)</label><input v-model="boardForm.customBrand"></div>
+            <div><label>Brand Option ID</label><input v-model="boardForm.brandOptionId" type="number" placeholder="Optional"></div>
+
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <label><input type="checkbox" v-model="boardForm.isSecondedHand"> 중고 여부</label>
+              <label><input type="checkbox" v-model="boardForm.isDamaged"> 파손 여부</label>
+            </div>
+
+            <div><label>Damage Info</label><input v-model="boardForm.damageInfo" :disabled="!boardForm.isDamaged"></div>
+            <div><label>Use Period (Months)</label><input v-model="boardForm.usePeriod" type="number"></div>
+
+            <div><label>Serial Code</label><input v-model="boardForm.serialCode"></div>
+            <div><label>Driver Unit</label><input v-model="boardForm.driver"></div>
+
+            <div>
+              <label>Charge Type</label>
+              <select v-model="boardForm.chargeType">
+                <option value="None">None</option>
+                <option value="USB_C">USB-C</option>
+                <option value="USB_MICRO">Micro USB</option>
+              </select>
+            </div>
+            <div>
+              <label>Mic Type</label>
+              <select v-model="boardForm.micType">
+                <option value="DYNAMIC">Dynamic</option>
+                <option value="CONDENSER">Condenser</option>
+              </select>
+            </div>
+
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <label><input type="checkbox" v-model="boardForm.canWire"> 유선 가능</label>
+              <label><input type="checkbox" v-model="boardForm.canWireless"> 무선 가능</label>
+            </div>
+
+            <div><label>Battery Time (hrs)</label><input v-model="boardForm.batteryTime" type="number" step="0.1"></div>
+            <div><label>Exposure Level</label><input v-model="boardForm.exposureLevel" type="number" value="0"></div>
+          </div>
+
+          <button class="action-btn success">Create Board (POST)</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="log-panel">
+      <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+        <strong>Traffic Log</strong>
+        <button @click="logs=[]" style="background:none; border:1px solid #555; color:#aaa; cursor:pointer;">Clear</button>
+      </div>
+      <div v-for="(log, idx) in logs" :key="idx" style="margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px;">
+        <span style="color: #888;">[{{ log.time }}]</span>
+        <span :style="{color: log.type === 'REQ' ? '#60a5fa' : log.type === 'ERR' ? '#ef4444' : '#34d399'}">
+                    {{ log.method }}
+                </span>
+        <div>{{ log.message }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const { createApp, ref, onMounted } = Vue;
+
+  createApp({
+      setup() {
+          // --- Config ---
+          const API_BASE = 'http://localhost:8080';
+
+          // --- State ---
+          const currentTab = ref('AUTH');
+          const token = ref('');
+          const isLoggedIn = ref(false);
+          const logs = ref([]);
+
+          // Auth Data
+          const loginForm = ref({ username: '', password: '' });
+          const signUpForm = ref({ email: '', password: '', name: '', nickname: '', phone: '', address: '' });
+
+          // Board Data
+          const boardList = ref([]);
+          const boardForm = ref({
+              title: '테스트 게시글',
+              initialPrice: 10000,
+              productName: '테스트 상품',
+              productCategory: 'HEADPHONE',
+              qualityGrade: 'A',
+              customBrand: 'Sony',
+              brandOptionId: null,
+              isSecondedHand: true,
+              isDamaged: false,
+              damageInfo: '',
+              usePeriod: 6,
+              serialCode: 'SN-1234',
+              driver: '40mm',
+              chargeType: 'USB_C',
+              micType: 'DYNAMIC',
+              connectType: 'Bluetooth',
+              batteryTime: 20.5,
+              canWire: true,
+              canWireless: true,
+              exposureLevel: 0
+          });
+
+          // --- Axios Setup ---
+          const api = axios.create({ baseURL: API_BASE, headers: { 'Content-Type': 'application/json' } });
+
+          api.interceptors.request.use(config => {
+              if (token.value) config.headers.Authorization = `Bearer ${token.value}`;
+              addLog('REQ', `${config.method.toUpperCase()} ${config.url}`, config.data || config.params);
+              return config;
+          });
+
+          api.interceptors.response.use(
+              res => {
+                  addLog('RES', `${res.status} ${res.request.responseURL}`, res.data);
+                  return res;
+              },
+              err => {
+                  const msg = err.response ? err.response.data : err.message;
+                  addLog('ERR', `FAIL ${err.response?.status || ''}`, msg);
+                  return Promise.reject(err);
+              }
+          );
+
+          // --- Methods: Logs ---
+          const addLog = (type, method, data) => {
+              const time = new Date().toLocaleTimeString();
+              const message = typeof data === 'object' ? JSON.stringify(data, null, 2) : data;
+              logs.value.unshift({ time, type, method, message });
+          };
+
+          // --- Methods: Auth ---
+          const login = async () => {
+              try {
+                  const res = await api.post('/login', loginForm.value);
+                  const authHeader = res.headers['authorization'];
+                  if (authHeader) {
+                      const jwt = authHeader.replace('Bearer ', '');
+                      setToken(jwt);
+                      alert('Login Success');
+                      currentTab.value = 'BOARD';
+                      fetchBoards();
+                  }
+              } catch(e) { alert('Login Failed'); }
+          };
+
+          const signUp = async () => {
+              try {
+                  await api.post('/auth/sign-up', signUpForm.value);
+                  alert('Signup Success');
+                  signUpForm.value = { email: '', password: '', ...signUpForm.value }; // Clear password
+              } catch(e) { alert('Signup Failed'); }
+          };
+
+          const logout = () => {
+              token.value = '';
+              isLoggedIn.value = false;
+              localStorage.removeItem('paseto_token');
+          };
+
+          const serverLogout = async () => {
+              await api.post('/auth/sign-out');
+              logout();
+          };
+
+          const setToken = (t) => {
+              token.value = t;
+              isLoggedIn.value = true;
+              localStorage.setItem('paseto_token', t);
+          };
+
+          // --- Methods: Board ---
+          const fetchBoards = async () => {
+              try {
+                  const res = await api.get('/boards');
+                  boardList.value = res.data;
+              } catch(e) {}
+          };
+
+          const createBoard = async () => {
+              if (!isLoggedIn.value) {
+                  alert('로그인이 필요합니다.');
+                  return;
+              }
+              try {
+                  // [변경] URL: /boards/create (MemberID 제거됨)
+                  const payload = { ...boardForm.value };
+                  await api.post(`/boards/create`, payload);
+
+                  alert('Board Created!');
+                  fetchBoards(); // 목록 갱신
+              } catch(e) {
+                  alert('Create Failed');
+              }
+          };
+
+          const updateState = async (boardId, newState) => {
+              // [주의] 현재 BoardListRes에는 boardId가 없어 productId를 대신 사용 중입니다.
+              // 백엔드에서 BoardListRes에 boardId 필드를 추가하면 더 정확해집니다.
+              try {
+                  await api.patch(`/boards/${boardId}/state`, null, {
+                      params: { state: newState }
+                  });
+                  fetchBoards();
+              } catch(e) {
+                  alert('Status Update Failed');
+              }
+          };
+
+          // --- Init ---
+          onMounted(() => {
+              const stored = localStorage.getItem('paseto_token');
+              if (stored) setToken(stored);
+          });
+
+          return {
+              currentTab, token, isLoggedIn, logs,
+              loginForm, signUpForm,
+              boardList, boardForm,
+              login, signUp, logout, serverLogout,
+              fetchBoards, createBoard, updateState
+          };
+      }
+  }).mount('#app');
+</script>
+
+</body>
+</html>
