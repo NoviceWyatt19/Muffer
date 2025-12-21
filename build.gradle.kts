@@ -37,8 +37,10 @@ dependencies {
 
     // Authentication / Token (PASETO)
     implementation("dev.paseto:jpaseto-api:0.7.0")
-    runtimeOnly("dev.paseto:jpaseto-impl:0.7.0")
-    runtimeOnly("dev.paseto:jpaseto-jackson:0.7.0")
+    runtimeOnly("dev.paseto:jpaseto-impl:0.7.0")  // implementation -> runtimeOnly
+    implementation("dev.paseto:jpaseto-jackson:0.7.0")
+    runtimeOnly("dev.paseto:jpaseto-bouncy-castle:0.7.0")
+    implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
 
     // Build / Utils
     compileOnly("org.projectlombok:lombok")
@@ -51,4 +53,8 @@ dependencies {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+tasks.withType<JavaExec> {
+    jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
 }
