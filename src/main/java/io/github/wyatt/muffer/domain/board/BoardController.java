@@ -3,12 +3,15 @@ package io.github.wyatt.muffer.domain.board;
 import io.github.wyatt.muffer.domain.board.code.BoardStatus;
 import io.github.wyatt.muffer.domain.board.request.BoardFilterReq;
 import io.github.wyatt.muffer.domain.board.request.BoardSvReq;
+import io.github.wyatt.muffer.domain.member.auth.CustomUserDetails;
+import io.github.wyatt.muffer.domain.member.auth.UserPrincipal;
 import io.github.wyatt.muffer.global.exceptions.BusinessAccessDeniedException;
 import io.github.wyatt.muffer.global.exceptions.ForbiddenModifyException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
@@ -27,20 +30,22 @@ public class BoardController {
         return ResponseEntity.ok().body(boardService.getBoards(new BoardFilterReq()));
     }
 
-    @PostMapping("/{memberId}/create")
-    public ResponseEntity<?> createBoard(@PathVariable("memberId") Long memberId, @RequestBody BoardSvReq req) {
-        boardService.saveBoard(req, memberId);
+    @PostMapping("/create")
+    public ResponseEntity<?> createBoard(
+            @RequestBody BoardSvReq req,
+            @AuthenticationPrincipal UserPrincipal user
+    ) {
+        boardService.saveBoard(req, user.userId());
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("message", "success"));
     }
 
     @PatchMapping("{boardId}/state")
     public ResponseEntity<?> updateState(
             @PathVariable Long boardId,
-            @RequestParam BoardStatus state
+            @RequestParam BoardStatus state,
+            @AuthenticationPrincipal UserPrincipal user
     ) {
-        //NOTE 추후 PASETO 붙이면 거기서 memberId 가져오기
-        Long memberId = 1L;
-        boardService.updateState(memberId, boardId, state);
+        boardService.updateState(user.userId(), boardId, state);
         return ResponseEntity.ok().build();
     }
 
