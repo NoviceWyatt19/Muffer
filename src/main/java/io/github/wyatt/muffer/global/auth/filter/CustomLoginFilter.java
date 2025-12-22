@@ -23,6 +23,7 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
     private final PasetoProvider pasetoProvider;
+    private final ObjectMapper objectMapper;
 
     /**
      * 인증 시도 성공한다면 인증 토큰을 생성해 반환
@@ -32,8 +33,7 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
             HttpServletRequest request,
             HttpServletResponse response) throws AuthenticationException {
         try{
-            ObjectMapper mapper = new ObjectMapper();
-            LoginRequest loginRequest = mapper.readValue(request.getInputStream(), LoginRequest.class);
+            LoginRequest loginRequest = objectMapper.readValue(request.getInputStream(), LoginRequest.class);
             // 인증 토큰 생성
             UsernamePasswordAuthenticationToken authToken =
                     new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password());
