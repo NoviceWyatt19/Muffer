@@ -52,8 +52,8 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
             HttpServletRequest request, HttpServletResponse response,
             FilterChain chain, Authentication authResult) throws IOException, ServletException {
         CustomUserDetails userDetails = (CustomUserDetails) authResult.getPrincipal();
-        String token = pasetoProvider.createToken(userDetails);
-        response.addHeader("Authorization", "Bearer " + token);
+        String accessToken = pasetoProvider.createToken(userDetails);
+        response.addHeader("Authorization", "Bearer " + accessToken);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write("{\"message\": \"로그인 성공\"}");
