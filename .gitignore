@@ -38,5 +38,6 @@ out/
 
 /src/main/resources/ErrorNote.md
 /src/main/resources/ToDo.md
+/src/main/resources/StudyNote.md
 
 /src/main/resources/applicatoin-secret.yml
