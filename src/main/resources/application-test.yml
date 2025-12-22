@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: optional:application-secret.yml
   datasource:
     url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
     driver-class-name: org.h2.Driver
@@ -11,6 +13,14 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      username: default
+      password: ${REDIS_PASSWORD}
+      port: ${REDIS_PORT}
+      ssl:
+        enabled: true
 
 # MUST BE DIFFERENT to application-prod
 paseto:
