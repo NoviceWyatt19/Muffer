@@ -1,5 +1,6 @@
 package io.github.wyatt.muffer.global.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.wyatt.muffer.domain.member.auth.CustomUserDetailsService;
 import io.github.wyatt.muffer.global.auth.filter.CustomLoginFilter;
 import io.github.wyatt.muffer.global.auth.filter.PasetoAuthenticationFilter;
@@ -72,7 +73,7 @@ public class SecurityConfig {
 
         // 필터 추가
         http
-            .addFilterAt(new CustomLoginFilter(authenticationManager(http, passwordEncoder()), pasetoProvider),
+            .addFilterAt(new CustomLoginFilter(authenticationManager(http, passwordEncoder()), pasetoProvider, new ObjectMapper()),
                     UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(new PasetoAuthenticationFilter(pasetoProvider),
                     CustomLoginFilter.class);
