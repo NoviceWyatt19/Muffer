@@ -52,7 +52,7 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
             HttpServletRequest request, HttpServletResponse response,
             FilterChain chain, Authentication authResult) throws IOException, ServletException {
         CustomUserDetails userDetails = (CustomUserDetails) authResult.getPrincipal();
-        String accessToken = pasetoProvider.createToken(userDetails);
+        String accessToken = pasetoProvider.createAccessToken(userDetails);
         response.addHeader("Authorization", "Bearer " + accessToken);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");

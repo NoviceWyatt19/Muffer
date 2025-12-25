@@ -35,7 +35,7 @@ public class PasetoProvider {
      * @param user: UserDetails 객체
      * @return token: roles 와 user id 포함
      */
-    public String createToken(CustomUserDetails user) {
+    public String createAccessToken(CustomUserDetails user) {
         String authorities = user.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
