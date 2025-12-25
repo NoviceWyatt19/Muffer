@@ -52,6 +52,7 @@ class OfferServiceTest {
 
     @BeforeEach
     void setUp() {
+        //given
         prd = Product.create(
                 "test product name",
                 ProductCategory.HEADPHONE,
@@ -99,8 +100,10 @@ class OfferServiceTest {
     @Test
     @DisplayName("Query Offer List")
     void getOfferListTest() {
+        // when
         List<OfrListRes> res = ofrService.getOfferList(ofr.getBoardId(), null);
-        System.out.println(res.getFirst().toString());
+
+        // then
         assertThat(res.isEmpty(), is(false));
         assertThat(res.size(), is(1));
     }
@@ -108,26 +111,35 @@ class OfferServiceTest {
     @Test
     @DisplayName("Can save offer")
     void saveOfferTest() {
+        // given
         Long requesterId = 2L;
         OfrSvReq req = new OfrSvReq(TradeType.DELIVERY, "test location", 19000);
+
+        //when
         ofrService.saveOffer(brd.getId(), 2L, req);
+
+        //then
         assertThat(ofrService.getOfferList(ofr.getBoardId(), null).size(), is(2));
     }
 
     @Test
     @DisplayName("If not board creator, can not change state")
     void changeStateFailTest() {
+        //when
         ChgStateReq req = new ChgStateReq(ofr.getId(), OfferStatus.ON_HOLD);
+        //then
         assertThrows(BusinessAccessDeniedException.class, () -> ofrService.changeState(ofr.getBoardId(), 2L, req));
     }
 
     @Test
     @DisplayName("Changing offer state Can do only seller")
     void changeStateSuccessTest() {
+        //given
         ChgStateReq req = new ChgStateReq(ofr.getId(), OfferStatus.ON_HOLD);
+        //when
         ofrService.changeState(ofr.getBoardId(), brd.getMemberId(), req);
-        Optional<Offer> offer = ofrRepo.findById(ofr.getId());
-        assertThat(offer.get().getStatus(), is(req.status()));
+        //then
+        assertThat(ofrRepo.findById(ofr.getId()).get().getStatus(), is(req.status()));
     }
 
 }
