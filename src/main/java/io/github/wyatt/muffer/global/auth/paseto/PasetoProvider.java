@@ -1,11 +1,10 @@
 package io.github.wyatt.muffer.global.auth.paseto;
 
-import dev.paseto.jpaseto.Claims;
-import dev.paseto.jpaseto.PasetoParser;
-import dev.paseto.jpaseto.Pasetos;
+import dev.paseto.jpaseto.*;
 import io.github.wyatt.muffer.domain.member.auth.CustomUserDetails;
 import io.github.wyatt.muffer.domain.member.auth.CustomUserDetailsService;
 import io.github.wyatt.muffer.domain.member.auth.UserPrincipal;
+import io.github.wyatt.muffer.global.exceptions.PasetoExpiredException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -68,13 +67,33 @@ public class PasetoProvider {
 
     public boolean validateToken(String token) {
         try {
-            parser.parse(token);
+            Paseto paseto = parser.parse(token);
+            if(paseto.getClaims().getExpiration().isBefore(Instant.now())) {
+                throw new PasetoExpiredException("this token is expired.");
+            }
             return true;
-        } catch (Exception e) {
+        }
+        catch (PasetoSignatureException ex) {
+            log.error("paseto signature is not valuable or use wrong key.");
+        }
+        catch (PasetoExpiredException ex) {
+            log.error("paseto token is expired.");
+        }
+        catch (PasetoException e) {
             log.error("fail to validate token");
             //TODO 예외 처리나 토큰 Expiration 만료
-            return false;
         }
+        return false;
+    }
+
+    public Claims parseClaims(String token) {
+        Paseto paseto = parser.parse(token);
+        Claims claims = paseto.getClaims();
+
+        if (claims.getExpiration().isBefore(Instant.now())) {
+            throw new PasetoExpiredException("this token is expired.");
+        }
+        return claims;
     }
 
 }
