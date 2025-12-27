@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-//TODO Redis 나 Refresh 관련 위치 재정리
 @Slf4j
 @Service
 @RequiredArgsConstructor

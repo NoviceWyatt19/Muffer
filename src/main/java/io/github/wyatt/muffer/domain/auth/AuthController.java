@@ -41,20 +41,6 @@ public class AuthController {
        response.addHeader("Set-Cookie", expiredCookie.toString());
     }
 
-//    @PostMapping("/sign-in") NOTE Filter 에서 처리
-//    public ResponseEntity<?> login(
-//            @RequestBody SignInReq req,
-//            HttpServletResponse httpServletResponse
-//    ) {
-//        RefreshToken refreshToken = authService.signIn(req);
-//        ResponseCookie refreshTokenCookie = TokenCookieFactory.createTokenCookie(
-//                "REFRESH_TOKEN", refreshToken.token(), refreshToken.ttl()
-//        );
-//        httpServletResponse.addHeader("Set-Cookie", refreshTokenCookie.toString());
-//        return ResponseEntity.ok().build();
-//    }
-
-
     /*
     @PostMapping("/reissue")
     public void reissue() {
