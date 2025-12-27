@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Muffer API Tester</title>
+  <title>Muffer API Tester (Integrated)</title>
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <style>
@@ -52,7 +52,7 @@
     <h1>Muffer Backend Tester</h1>
     <div v-if="isLoggedIn">
       <span style="font-size: 0.9em; color: green; font-weight: bold;">● Authenticated</span>
-      <button @click="logout" class="action-btn sm danger" style="margin-left: 10px;">Logout</button>
+      <button @click="serverLogout" class="action-btn sm danger" style="margin-left: 10px;">Logout</button>
     </div>
     <div v-else>
       <span style="font-size: 0.9em; color: red; font-weight: bold;">○ Not Logged In</span>
@@ -90,9 +90,13 @@
           </div>
         </div>
         <div v-else>
-          <p>현재 로그인된 토큰값 (Paseto):</p>
-          <textarea readonly style="width:100%; height: 100px; font-size:11px; color:#555;">{{ token }}</textarea>
-          <button @click="serverLogout" class="action-btn danger">Server Logout API</button>
+          <p style="color: green;"><strong>Status:</strong> Logged In</p>
+          <div style="background: #eee; padding: 10px; border-radius: 4px; font-size: 0.85em; margin-bottom: 10px;">
+            <strong>Current Access Token (Header):</strong><br>
+            <div style="word-break: break-all;">{{ accessToken }}</div>
+            <br>
+            <strong>Refresh Token:</strong> Saved in HttpOnly Cookie (Invisible to JS)
+          </div>
         </div>
       </div>
 
@@ -222,7 +226,7 @@
 
     <div class="log-panel">
       <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-        <strong>Traffic Log</strong>
+        <strong>Network Log</strong>
         <button @click="logs=[]" style="background:none; border:1px solid #555; color:#aaa; cursor:pointer;">Clear</button>
       </div>
       <div v-for="(log, idx) in logs" :key="idx" style="margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px;">
@@ -246,7 +250,7 @@
 
           // --- State ---
           const currentTab = ref('AUTH');
-          const token = ref('');
+          const accessToken = ref('');
           const isLoggedIn = ref(false);
           const logs = ref([]);
 
@@ -279,11 +283,15 @@
               exposureLevel: 0
           });
 
-          // --- Axios Setup ---
-          const api = axios.create({ baseURL: API_BASE, headers: { 'Content-Type': 'application/json' } });
+          // --- Axios Setup (withCredentials 필수) ---
+          const api = axios.create({
+              baseURL: API_BASE,
+              withCredentials: true // Cookie 전송 허용
+          });
 
           api.interceptors.request.use(config => {
-              if (token.value) config.headers.Authorization = `Bearer ${token.value}`;
+              // Header에 Access Token 추가
+              if (accessToken.value) config.headers.Authorization = `Bearer ${accessToken.value}`;
               addLog('REQ', `${config.method.toUpperCase()} ${config.url}`, config.data || config.params);
               return config;
           });
@@ -312,10 +320,11 @@
               try {
                   const res = await api.post('/login', loginForm.value);
                   const authHeader = res.headers['authorization'];
+
                   if (authHeader) {
-                      const jwt = authHeader.replace('Bearer ', '');
-                      setToken(jwt);
-                      alert('Login Success');
+                      const token = authHeader.replace('Bearer ', '');
+                      setToken(token);
+                      alert('Login Success! (Refresh Token in Cookie)');
                       currentTab.value = 'BOARD';
                       fetchBoards();
                   }
@@ -325,26 +334,30 @@
           const signUp = async () => {
               try {
                   await api.post('/auth/sign-up', signUpForm.value);
-                  alert('Signup Success');
-                  signUpForm.value = { email: '', password: '', ...signUpForm.value }; // Clear password
+                  alert('Signup Success (Check Logic)');
               } catch(e) { alert('Signup Failed'); }
           };
 
-          const logout = () => {
-              token.value = '';
+          const logoutClient = () => {
+              accessToken.value = '';
               isLoggedIn.value = false;
-              localStorage.removeItem('paseto_token');
+              localStorage.removeItem('access_token');
           };
 
           const serverLogout = async () => {
-              await api.post('/auth/sign-out');
-              logout();
+              try {
+                  await api.post('/auth/sign-out'); // Cookie도 함께 전송됨
+              } catch(e) {
+                  console.error("Logout API Fail:", e);
+              } finally {
+                  logoutClient();
+              }
           };
 
-          const setToken = (t) => {
-              token.value = t;
+          const setToken = (token) => {
+              accessToken.value = token;
               isLoggedIn.value = true;
-              localStorage.setItem('paseto_token', t);
+              localStorage.setItem('access_token', token);
           };
 
           // --- Methods: Board ---
@@ -361,20 +374,17 @@
                   return;
               }
               try {
-                  // [변경] URL: /boards/create (MemberID 제거됨)
                   const payload = { ...boardForm.value };
+                  // /boards/create (MemberId는 토큰에서 추출)
                   await api.post(`/boards/create`, payload);
-
                   alert('Board Created!');
-                  fetchBoards(); // 목록 갱신
+                  fetchBoards();
               } catch(e) {
                   alert('Create Failed');
               }
           };
 
           const updateState = async (boardId, newState) => {
-              // [주의] 현재 BoardListRes에는 boardId가 없어 productId를 대신 사용 중입니다.
-              // 백엔드에서 BoardListRes에 boardId 필드를 추가하면 더 정확해집니다.
               try {
                   await api.patch(`/boards/${boardId}/state`, null, {
                       params: { state: newState }
@@ -387,15 +397,15 @@
 
           // --- Init ---
           onMounted(() => {
-              const stored = localStorage.getItem('paseto_token');
+              const stored = localStorage.getItem('access_token');
               if (stored) setToken(stored);
           });
 
           return {
-              currentTab, token, isLoggedIn, logs,
+              currentTab, accessToken, isLoggedIn, logs,
               loginForm, signUpForm,
               boardList, boardForm,
-              login, signUp, logout, serverLogout,
+              login, signUp, serverLogout,
               fetchBoards, createBoard, updateState
           };
       }
