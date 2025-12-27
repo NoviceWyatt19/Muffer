@@ -6,12 +6,14 @@ import io.github.wyatt.muffer.global.auth.utils.TokenCookieFactory;
 import io.github.wyatt.muffer.domain.auth.token.TokenType;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RequestMapping("/auth")
 @RestController
 @RequiredArgsConstructor
@@ -35,6 +37,7 @@ public class AuthController {
            @CookieValue(name = "REFRESH_TOKEN", required = false) String refreshToken,
            HttpServletResponse response
    ) {
+       log.info("Logout requested with token: {}", refreshToken);
         if (refreshToken != null) authService.logout(refreshToken);
 
        ResponseCookie expiredCookie = TokenCookieFactory.createExpiredToken(TokenType.REFRESH_TOKEN.name());
