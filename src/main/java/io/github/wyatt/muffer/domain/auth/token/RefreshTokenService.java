@@ -27,7 +27,9 @@ public class RefreshTokenService {
     }
 
     public void deleteToken(String refreshToken) {
-        refreshTokenRepo.deleteById(refreshToken);
-        log.info("delete refresh token -> {}", refreshToken);
+        refreshTokenRepo.findById(refreshToken).ifPresent(token -> {
+            refreshTokenRepo.delete(token);
+            log.info("Successfully deleted refresh token from Redis: {}", refreshToken);
+        });
     }
 }
