@@ -1,4 +1,4 @@
-package io.github.wyatt.muffer.domain.member.auth;
+package io.github.wyatt.muffer.domain.auth.request;
 
 import io.github.wyatt.muffer.domain.member.Member;
 import io.github.wyatt.muffer.domain.member.Role;

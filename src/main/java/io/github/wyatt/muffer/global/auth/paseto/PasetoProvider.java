@@ -1,9 +1,9 @@
 package io.github.wyatt.muffer.global.auth.paseto;
 
 import dev.paseto.jpaseto.*;
-import io.github.wyatt.muffer.domain.member.auth.CustomUserDetails;
-import io.github.wyatt.muffer.domain.member.auth.CustomUserDetailsService;
-import io.github.wyatt.muffer.domain.member.auth.UserPrincipal;
+import io.github.wyatt.muffer.global.auth.principal.CustomUserDetails;
+import io.github.wyatt.muffer.domain.auth.service.CustomUserDetailsService;
+import io.github.wyatt.muffer.global.auth.principal.UserPrincipal;
 import io.github.wyatt.muffer.global.exceptions.PasetoExpiredException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +18,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -46,6 +47,7 @@ public class PasetoProvider {
                 .setExpiration(Instant.now().plus(3, ChronoUnit.MINUTES)) //NOTE 유효기간 3분 추후 변경 필요
                 .claim("authorities", authorities)
                 .claim("userId", user.member().getId())
+                .claim("aid", UUID.randomUUID().toString())
                 .compact();
 
     }

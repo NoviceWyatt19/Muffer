@@ -1,7 +1,7 @@
 package io.github.wyatt.muffer.global.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.wyatt.muffer.domain.member.auth.CustomUserDetailsService;
+import io.github.wyatt.muffer.domain.auth.service.CustomUserDetailsService;
 import io.github.wyatt.muffer.global.auth.filter.CustomLoginFilter;
 import io.github.wyatt.muffer.global.auth.filter.PasetoAuthenticationFilter;
 import io.github.wyatt.muffer.global.auth.paseto.PasetoProvider;

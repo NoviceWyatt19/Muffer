@@ -1,5 +1,7 @@
 package io.github.wyatt.muffer.domain.member.auth;
 
+import io.github.wyatt.muffer.domain.auth.service.AuthService;
+import io.github.wyatt.muffer.domain.auth.request.SignUpReq;
 import io.github.wyatt.muffer.domain.member.Member;
 import io.github.wyatt.muffer.domain.member.MemberRepo;
 import io.github.wyatt.muffer.domain.member.Role;
@@ -14,7 +16,6 @@ import org.springframework.util.ObjectUtils;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -52,12 +53,5 @@ class AuthServiceTest {
         assertThat(ObjectUtils.isEmpty(member), is(false));
         assertThat(member.getRole(), is(Role.USER));
 
-    }
-
-    @Test
-    @DisplayName("Sign out test")
-    void signOut() {
-        authService.signOut(testMember.getId());
-        assertThat(memberRepo.findById(testMember.getId()).get().isActivated(), is(false));
     }
 }

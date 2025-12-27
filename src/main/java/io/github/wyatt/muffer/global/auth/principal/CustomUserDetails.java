@@ -1,7 +1,6 @@
-package io.github.wyatt.muffer.domain.member.auth;
+package io.github.wyatt.muffer.global.auth.principal;
 
 import io.github.wyatt.muffer.domain.member.Member;
-import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

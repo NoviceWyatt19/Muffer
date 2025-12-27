@@ -1,5 +1,6 @@
-package io.github.wyatt.muffer.domain.member.auth;
+package io.github.wyatt.muffer.domain.auth.service;
 
+import io.github.wyatt.muffer.global.auth.principal.CustomUserDetails;
 import io.github.wyatt.muffer.domain.member.MemberRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;

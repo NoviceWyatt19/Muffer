@@ -1,8 +1,12 @@
 package io.github.wyatt.muffer.global.auth.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.wyatt.muffer.domain.member.auth.CustomUserDetails;
+import io.github.wyatt.muffer.global.auth.principal.CustomUserDetails;
 import io.github.wyatt.muffer.global.auth.paseto.PasetoProvider;
+import io.github.wyatt.muffer.domain.auth.token.RefreshToken;
+import io.github.wyatt.muffer.domain.auth.token.RefreshTokenService;
+import io.github.wyatt.muffer.global.auth.utils.TokenCookieFactory;
+import io.github.wyatt.muffer.domain.auth.token.TokenType;
 import io.github.wyatt.muffer.global.config.ErrorCode;
 import io.github.wyatt.muffer.global.exceptions.UnauthenticationException;
 import jakarta.servlet.FilterChain;
@@ -10,6 +14,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -24,6 +29,10 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final PasetoProvider pasetoProvider;
     private final ObjectMapper objectMapper;
+    private final RefreshTokenService refreshTokenService;
+
+    @Value("${paseto.expiration}")
+    private Long exp;
 
     /**
      * 인증 시도 성공한다면 인증 토큰을 생성해 반환
@@ -53,6 +62,8 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
             FilterChain chain, Authentication authResult) throws IOException, ServletException {
         CustomUserDetails userDetails = (CustomUserDetails) authResult.getPrincipal();
         String accessToken = pasetoProvider.createAccessToken(userDetails);
+        RefreshToken refreshToken = refreshTokenService.save(pasetoProvider.parseClaims(accessToken).get("aid", String.class));
+        response.addHeader("Set-Cookie", TokenCookieFactory.createTokenCookie(TokenType.REFRESH_TOKEN.name(), refreshToken.token(), refreshToken.ttl()).toString());
         response.addHeader("Authorization", "Bearer " + accessToken);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");

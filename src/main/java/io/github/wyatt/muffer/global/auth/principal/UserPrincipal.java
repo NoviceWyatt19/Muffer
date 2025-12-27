@@ -1,4 +1,4 @@
-package io.github.wyatt.muffer.domain.member.auth;
+package io.github.wyatt.muffer.global.auth.principal;
 
 import org.springframework.security.core.GrantedAuthority;
 

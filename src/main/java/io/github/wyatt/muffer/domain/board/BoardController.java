@@ -3,8 +3,7 @@ package io.github.wyatt.muffer.domain.board;
 import io.github.wyatt.muffer.domain.board.code.BoardStatus;
 import io.github.wyatt.muffer.domain.board.request.BoardFilterReq;
 import io.github.wyatt.muffer.domain.board.request.BoardSvReq;
-import io.github.wyatt.muffer.domain.member.auth.CustomUserDetails;
-import io.github.wyatt.muffer.domain.member.auth.UserPrincipal;
+import io.github.wyatt.muffer.global.auth.principal.UserPrincipal;
 import io.github.wyatt.muffer.global.exceptions.BusinessAccessDeniedException;
 import io.github.wyatt.muffer.global.exceptions.ForbiddenModifyException;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.nio.file.AccessDeniedException;
 import java.util.Map;
 
 @Slf4j
