@@ -2,6 +2,7 @@ package io.github.wyatt.muffer.global.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.wyatt.muffer.domain.auth.service.CustomUserDetailsService;
+import io.github.wyatt.muffer.domain.auth.token.RefreshTokenService;
 import io.github.wyatt.muffer.global.auth.filter.CustomLoginFilter;
 import io.github.wyatt.muffer.global.auth.filter.PasetoAuthenticationFilter;
 import io.github.wyatt.muffer.global.auth.paseto.PasetoProvider;
@@ -25,8 +26,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final PasetoProvider pasetoProvider;
-    private final AuthenticationConfiguration authConfig;
     private final CustomUserDetailsService userDetailsService;
+    private final RefreshTokenService refreshTokenService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -65,15 +66,16 @@ public class SecurityConfig {
         );
         // 경로별 인가 설정 (추후 세부화)
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login", "/join").permitAll()
+                .requestMatchers("/*", "/auth/**", "/login", "/join").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
+                .requestMatchers("/boards/**").hasAnyRole("USER", "ADMIN")
                 .requestMatchers("/admin/**").hasRole("ADMIN")
-                .anyRequest().permitAll()
+                .anyRequest().authenticated()
         );
 
         // 필터 추가
         http
-            .addFilterAt(new CustomLoginFilter(authenticationManager(http, passwordEncoder()), pasetoProvider, new ObjectMapper()),
+            .addFilterAt(new CustomLoginFilter(authenticationManager(http, passwordEncoder()), pasetoProvider, new ObjectMapper(), refreshTokenService),
                     UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(new PasetoAuthenticationFilter(pasetoProvider),
                     CustomLoginFilter.class);
