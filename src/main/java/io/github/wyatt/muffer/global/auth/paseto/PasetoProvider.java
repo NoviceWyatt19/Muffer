@@ -6,7 +6,6 @@ import io.github.wyatt.muffer.domain.auth.token.RefreshToken;
 import io.github.wyatt.muffer.domain.auth.token.RefreshTokenService;
 import io.github.wyatt.muffer.global.auth.principal.CustomUserDetails;
 import io.github.wyatt.muffer.global.auth.principal.UserPrincipal;
-import io.github.wyatt.muffer.global.exceptions.PasetoExpiredException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
