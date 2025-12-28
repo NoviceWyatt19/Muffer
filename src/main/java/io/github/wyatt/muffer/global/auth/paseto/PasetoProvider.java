@@ -1,8 +1,10 @@
 package io.github.wyatt.muffer.global.auth.paseto;
 
 import dev.paseto.jpaseto.*;
-import io.github.wyatt.muffer.global.auth.principal.CustomUserDetails;
 import io.github.wyatt.muffer.domain.auth.service.CustomUserDetailsService;
+import io.github.wyatt.muffer.domain.auth.token.RefreshToken;
+import io.github.wyatt.muffer.domain.auth.token.RefreshTokenService;
+import io.github.wyatt.muffer.global.auth.principal.CustomUserDetails;
 import io.github.wyatt.muffer.global.auth.principal.UserPrincipal;
 import io.github.wyatt.muffer.global.exceptions.PasetoExpiredException;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +31,7 @@ public class PasetoProvider {
     private final PasetoParser parser;
     private final SecretKey secretKey;
     private final CustomUserDetailsService userDetailsService;
+    private final RefreshTokenService refreshTokenService;
 
     /**
      * 토큰 생성
@@ -67,19 +70,14 @@ public class PasetoProvider {
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
 
+    //TODO 검증 로직 삽입 필요
     public boolean validateToken(String token) {
         try {
             Paseto paseto = parser.parse(token);
-            if(paseto.getClaims().getExpiration().isBefore(Instant.now())) {
-                throw new PasetoExpiredException("this token is expired.");
-            }
             return true;
         }
         catch (PasetoSignatureException ex) {
             log.error("paseto signature is not valuable or use wrong key.");
-        }
-        catch (PasetoExpiredException ex) {
-            log.error("paseto token is expired.");
         }
         catch (PasetoException e) {
             log.error("fail to validate token");
@@ -89,13 +87,41 @@ public class PasetoProvider {
     }
 
     public Claims parseClaims(String token) {
-        Paseto paseto = parser.parse(token);
-        Claims claims = paseto.getClaims();
+        return parser.parse(token).getClaims();
+    }
 
-        if (claims.getExpiration().isBefore(Instant.now())) {
-            throw new PasetoExpiredException("this token is expired.");
+    //TODO paseto exception 고려
+    public boolean isAccessTokenExpired(String token) {
+        Claims claims = parser.parse(token).getClaims();
+        return claims.getExpiration().isBefore(Instant.now());
+    }
+
+    public String reissueAccessToken(Claims claims, String refreshTokenId) {
+        String username = claims.getSubject();
+        CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(username);
+        String authorities = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
+
+        //TODO exception 재정의 필요 1
+        RefreshToken refreshToken = refreshTokenService.findById(refreshTokenId).orElseThrow(
+                () -> new RuntimeException("Not Found Refresh Token")
+        );
+
+        //TODO exception 재정의 필요 2
+        if( !claims.get("aid", String.class).equals(refreshToken.aid()) ) {
+            throw new RuntimeException("aid is miss matching");
         }
-        return claims;
+
+        return Pasetos.V2.LOCAL.builder()
+                .setSharedSecret(this.secretKey) // 충돌 방지용 this, this 제거 무관
+                .setSubject(userDetails.getUsername()) // 유저 식별
+                .setIssuedAt(Instant.now())
+                .setExpiration(Instant.now().plus(3, ChronoUnit.MINUTES)) //NOTE 유효기간 3분 추후 변경 필요
+                .claim("authorities", authorities)
+                .claim("userId", userDetails.member().getId())
+                .claim("aid", refreshToken.aid())
+                .compact();
     }
 
 }

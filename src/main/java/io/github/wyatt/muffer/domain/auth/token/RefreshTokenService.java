@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -31,5 +32,17 @@ public class RefreshTokenService {
             refreshTokenRepo.delete(token);
             log.info("Successfully deleted refresh token from Redis: {}", refreshToken);
         });
+    }
+
+    public boolean isRefreshTokenExisted(String aid) {
+        return refreshTokenRepo.existsByAid(aid);
+    }
+
+    public Optional<RefreshToken> findByAid(String aid) {
+        return refreshTokenRepo.findByAid(aid);
+    }
+
+    public Optional<RefreshToken> findById(String refreshTokenId) {
+        return refreshTokenRepo.findById(refreshTokenId);
     }
 }
