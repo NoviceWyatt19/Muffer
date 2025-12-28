@@ -42,3 +42,4 @@ out/
 /src/main/resources/PredictableQuestionList.md
 
 /src/main/resources/applicatoin-secret.yml
+/logs
