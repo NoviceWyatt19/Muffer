@@ -1,6 +1,7 @@
 package io.github.wyatt.muffer.global.auth.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.paseto.jpaseto.Claims;
 import io.github.wyatt.muffer.global.auth.principal.CustomUserDetails;
 import io.github.wyatt.muffer.global.auth.paseto.PasetoProvider;
 import io.github.wyatt.muffer.domain.auth.token.RefreshToken;
@@ -33,7 +34,7 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
     private final ObjectMapper objectMapper;
     private final RefreshTokenService refreshTokenService;
 
-    @Value("${paseto.expiration}")
+    @Value("${paseto.refresh-token.expiration}")
     private Long exp;
 
     /**
@@ -62,15 +63,18 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(
             HttpServletRequest request, HttpServletResponse response,
             FilterChain chain, Authentication authResult) throws IOException, ServletException {
+        long start = System.currentTimeMillis();
         CustomUserDetails userDetails = (CustomUserDetails) authResult.getPrincipal();
         String accessToken = pasetoProvider.createAccessToken(userDetails);
-        RefreshToken refreshToken = refreshTokenService.save(pasetoProvider.parseClaims(accessToken).get("aid", String.class));
+        Claims claims = pasetoProvider.parseClaims(accessToken);
+        RefreshToken refreshToken = refreshTokenService.create(claims.get("aid", String.class), claims.getSubject());
         log.info("create refresh token -> {}", refreshToken);
         response.addHeader("Set-Cookie", TokenCookieFactory.createTokenCookie(TokenType.REFRESH_TOKEN.name(), refreshToken.token(), refreshToken.ttl()).toString());
         response.addHeader("Authorization", "Bearer " + accessToken);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write("{\"message\": \"로그인 성공\"}");
+        log.debug(">>> [Time] 로그인 전체 처리 소요시간: {} ms", System.currentTimeMillis() - start);
     }
 
     /**

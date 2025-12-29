@@ -1,13 +1,11 @@
 package io.github.wyatt.muffer.global.auth.paseto;
 
 import dev.paseto.jpaseto.*;
-import io.github.wyatt.muffer.domain.auth.service.CustomUserDetailsService;
-import io.github.wyatt.muffer.domain.auth.token.RefreshToken;
-import io.github.wyatt.muffer.domain.auth.token.RefreshTokenService;
 import io.github.wyatt.muffer.global.auth.principal.CustomUserDetails;
 import io.github.wyatt.muffer.global.auth.principal.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,7 +14,6 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
@@ -29,8 +26,9 @@ public class PasetoProvider {
 
     private final PasetoParser parser;
     private final SecretKey secretKey;
-    private final CustomUserDetailsService userDetailsService;
-    private final RefreshTokenService refreshTokenService;
+
+    @Value("${paseto.access-token.expiration}")
+    private Long accExp;
 
     /**
      * 토큰 생성
@@ -46,7 +44,7 @@ public class PasetoProvider {
                 .setSharedSecret(this.secretKey) // 충돌 방지용 this, this 제거 무관
                 .setSubject(user.getUsername()) // 유저 식별
                 .setIssuedAt(Instant.now())
-                .setExpiration(Instant.now().plus(3, ChronoUnit.MINUTES)) //NOTE 유효기간 3분 추후 변경 필요
+                .setExpiration(Instant.now().plusMillis(accExp))
                 .claim("authorities", authorities)
                 .claim("userId", user.member().getId())
                 .claim("aid", UUID.randomUUID().toString())
@@ -93,34 +91,6 @@ public class PasetoProvider {
     public boolean isAccessTokenExpired(String token) {
         Claims claims = parser.parse(token).getClaims();
         return claims.getExpiration().isBefore(Instant.now());
-    }
-
-    public String reissueAccessToken(Claims claims, String refreshTokenId) {
-        String username = claims.getSubject();
-        CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(username);
-        String authorities = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(","));
-
-        //TODO exception 재정의 필요 1
-        RefreshToken refreshToken = refreshTokenService.findById(refreshTokenId).orElseThrow(
-                () -> new RuntimeException("Not Found Refresh Token")
-        );
-
-        //TODO exception 재정의 필요 2
-        if( !claims.get("aid", String.class).equals(refreshToken.aid()) ) {
-            throw new RuntimeException("aid is miss matching");
-        }
-
-        return Pasetos.V2.LOCAL.builder()
-                .setSharedSecret(this.secretKey) // 충돌 방지용 this, this 제거 무관
-                .setSubject(userDetails.getUsername()) // 유저 식별
-                .setIssuedAt(Instant.now())
-                .setExpiration(Instant.now().plus(3, ChronoUnit.MINUTES)) //NOTE 유효기간 3분 추후 변경 필요
-                .claim("authorities", authorities)
-                .claim("userId", userDetails.member().getId())
-                .claim("aid", refreshToken.aid())
-                .compact();
     }
 
 }

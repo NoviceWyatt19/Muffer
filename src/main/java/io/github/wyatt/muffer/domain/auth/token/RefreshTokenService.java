@@ -17,20 +17,28 @@ public class RefreshTokenService {
     private final RefreshTokenRedisRepo refreshTokenRepo;
     private final ObjectMapper objectMapper;
 
-    @Value("${paseto.expiration}")
+    @Value("${paseto.refresh-token.expiration}")
     private Long exp;
 
-    public RefreshToken save(String aid) {
-        RefreshToken refreshToken = new RefreshToken(UUID.randomUUID().toString(), aid, exp);
+    public RefreshToken create(String aid, String username) {
+        RefreshToken refreshToken = new RefreshToken(UUID.randomUUID().toString(), username, aid, exp);
         log.info("save refresh token -> {}", refreshToken);
         refreshTokenRepo.save(refreshToken);
         return refreshToken;
     }
 
-    public void deleteToken(String refreshToken) {
-        refreshTokenRepo.findById(refreshToken).ifPresent(token -> {
+    public void create(RefreshToken refreshToken) {
+        refreshTokenRepo.save(refreshToken);
+    }
+
+    public void delete(RefreshToken refreshToken) {
+        refreshTokenRepo.delete(refreshToken);
+    }
+
+    public void deleteToken(String refreshTokenId) {
+        refreshTokenRepo.findById(refreshTokenId).ifPresent(token -> {
             refreshTokenRepo.delete(token);
-            log.info("Successfully deleted refresh token from Redis: {}", refreshToken);
+            log.info("Successfully deleted refresh token from Redis: {}", refreshTokenId);
         });
     }
 

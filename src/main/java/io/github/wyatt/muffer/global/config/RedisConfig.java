@@ -31,11 +31,11 @@ public class RedisConfig {
     @Value("${spring.data.redis.host}")
     private String host;
 
-    @Value("${spring.data.redis.username}")
-    private String username;
-
-    @Value("${spring.data.redis.password}")
-    private String password;
+//    @Value("${spring.data.redis.username}")
+//    private String username;
+//
+//    @Value("${spring.data.redis.password}")
+//    private String password;
 
     private ApplicationContext applicationContext;
 
@@ -47,8 +47,8 @@ public class RedisConfig {
         RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
         configuration.setPort(port);
         configuration.setHostName(host);
-        configuration.setUsername(username);
-        configuration.setPassword(password);
+//        configuration.setUsername(username);
+//        configuration.setPassword(password);
         return new LettuceConnectionFactory(configuration);
     }
 

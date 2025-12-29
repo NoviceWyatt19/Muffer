@@ -20,14 +20,19 @@ spring:
 
   data:
     redis:
-      host: ${REDIS_HOST}
-      username: default
-      password: ${REDIS_PASSWORD}
-      port: ${REDIS_PORT}
+      host: localhost
+      port: 6379
+#      host: ${REDIS_HOST}
+#      username: default
+#      password: ${REDIS_PASSWORD}
+#      port: ${REDIS_PORT}
       ssl:
         enabled: true
 
 # MUST BE DIFFERENT to application-prod
 paseto:
   secret: "Z9fQmA7Lx3P2sJ8kTnWcR4D0eE6VhU5BKyM1HqNopYtSaIbFdrCg"
-  expiration: 86400
+  refresh-token:
+    expiration: 86400
+  access-token:
+    expiration: 180000

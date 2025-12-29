@@ -298,6 +298,16 @@
 
           api.interceptors.response.use(
               res => {
+                  const newAuthHeader = res.headers['authorization'];
+                  if (newAuthHeader) {
+                      const newToken = newAuthHeader.replace('Bearer ', '');
+                      if (newToken && newToken !== accessToken.value) {
+                          setToken(newToken); // 로컬 스토리지 및 상태 업데이트
+                          console.log("Token Auto Refreshed via Header"); // 디버깅용 로그
+                          addLog('INFO', 'Token Refreshed', 'New Access Token saved');
+                      }
+                  }
+
                   addLog('RES', `${res.status} ${res.request.responseURL}`, res.data);
                   return res;
               },

@@ -1,6 +1,7 @@
 package io.github.wyatt.muffer.global.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.wyatt.muffer.domain.auth.service.AuthService;
 import io.github.wyatt.muffer.domain.auth.service.CustomUserDetailsService;
 import io.github.wyatt.muffer.domain.auth.token.RefreshTokenService;
 import io.github.wyatt.muffer.global.auth.filter.CustomLoginFilter;
@@ -28,11 +29,8 @@ public class SecurityConfig {
     private final PasetoProvider pasetoProvider;
     private final CustomUserDetailsService userDetailsService;
     private final RefreshTokenService refreshTokenService;
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+    private final PasswordEncoder passwordEncoder;
+    private final AuthService authService;
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http, PasswordEncoder passwordEncoder) throws Exception {
@@ -75,9 +73,9 @@ public class SecurityConfig {
 
         // 필터 추가
         http
-            .addFilterAt(new CustomLoginFilter(authenticationManager(http, passwordEncoder()), pasetoProvider, new ObjectMapper(), refreshTokenService),
+            .addFilterAt(new CustomLoginFilter(authenticationManager(http, passwordEncoder), pasetoProvider, new ObjectMapper(), refreshTokenService),
                     UsernamePasswordAuthenticationFilter.class)
-            .addFilterBefore(new PasetoAuthenticationFilter(pasetoProvider),
+            .addFilterBefore(new PasetoAuthenticationFilter(pasetoProvider, authService),
                     CustomLoginFilter.class);
         return http.build();
     }
